@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Live Text Editor</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	<style>
+		/* Style for comment */
+		.comment {
+			color: #777;
+			font-style: italic;
+		}
+
+		.edit-div {
+			width: 200px;
+			height: 100px;
+			border: 1px solid grey;
+			border-radius: 5px;
+			background: #80808014;
+		}
+
+		.comment-line {
+			padding: 18px 0px 15px 0px;
+			border-bottom: 1px solid grey;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1 class="mt-3">Live Text Editor</h1>
+		<div class="row">
+			<div class="col-12">
+				<button id="bold-btn" class="btn btn-default text-modifier mb-2"><i class="fas fa-bold"></i> Bold</button>
+				<button id="italic-btn" class="btn btn-default text-modifier mb-2"><i class="fas fa-italic"></i> Italic</button>
+			</div>
+			<div class="col-12 edit-div" contenteditable="true">
+
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-12">
+				<button id="add-comment-btn" class="btn btn-success mr-3"><i class="fas fa-comment"></i> Add Comment</button>
+				<button id="prev-comment-btn" class="btn btn-primary mr-3"><i class="fas fa-comment"></i> Load Comments</button>
+				<button id="clear-comment-btn" class="btn btn-danger mr-3"><i class="fas fa-comment"></i> Clear Comments</button>
+
+			</div>
+			<p>Note: I have used Local Storage to store and load comment </p>
+		</div>
+	</div>
+	<!-- Comment modal -->
+	<div class="modal fade" id="comment-modal" tabindex="-1" role="dialog" aria-labelledby="comment-modal-label" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="comment-modal-label">Previous Comment</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<div id="all-comments">
+
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script>
+	<script>
+		var allComment = [];
+
+		$(document).ready(function() {
+
+			$(".text-modifier").on("click", function(e) {
+
+				$(this).toggleClass("btn-primary");
+			});
+
+			$("#bold-btn").on("click", function() {
+				var selection = window.getSelection().toString();
+
+				if (selection !== '') {
+					document.execCommand('bold', false, null);
+				}
+			});
+
+			$("#italic-btn").on("click", function() {
+				var selection = window.getSelection().toString();
+
+				if (selection !== '') {
+					document.execCommand('italic', false, null);
+				}
+			});
+
+
+			$("#add-comment-btn").on("click", function() {
+
+				var comment = $('.edit-div').html();
+				console.log(comment);
+				allComment.push(comment);
+
+				localStorage.setItem("myComments", JSON.stringify(allComment));
+			});
+
+			$("#clear-comment-btn").on("click", function() {
+
+				localStorage.setItem("myComments", []);
+			});
+
+			var commentModal = $('#comment-modal');
+			$('#prev-comment-btn').click(function() {
+
+				var previousComments = localStorage.getItem("myComments");
+				previousComments = JSON.parse(previousComments)
+				console.log(previousComments);
+
+				let html = "";
+				$.each(previousComments, function(i, v) {
+					html += `<p class="comment-line"><span> ${v}</span> <button type="button btn-xs" class="btn btn-secondary" style="float: right;" onclick="selectComment(this)">select</button></p>`;
+				});
+				$('#all-comments').html(html)
+				// Show comment modal
+				commentModal.modal('show');
+			});
+
+		});
+
+		function selectComment(ds) {
+			var selectedComment = $(ds).prev().html();
+
+			$('.edit-div').html(selectedComment);
+			var commentModal = $('#comment-modal');
+			commentModal.modal('hide');
+		}
+	</script>
+</body>
+
+</html>
